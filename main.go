@@ -9,7 +9,11 @@ func main(){
 	blockChain := block.NewBlockchain()
 
 
-	blockChain.CreateBlock(0, blockChain.LastBlock().Hash(), []string{"tr1", "tr2", "tr3"})
+	blockChain.CreateTransaction("recipeint address", "senderaddress", 1)
+	blockChain.CreateTransaction("recipeint address", "senderaddress", 2)
+	
+	blockChain.CreateBlock(1, blockChain.LastBlock().Hash(), blockChain.TransactionPool)
+
 
 	blockChain.Print()
 
