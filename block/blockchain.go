@@ -31,11 +31,36 @@ func(bc *Blockchain) CreateBlock(nonce int, previousHash [32]byte, transaction [
 	bc.Chain = append(bc.Chain, block)
 	
 	// update trnsactionPool
+	bc.TransactionPool = []*Transaction{}
 }
 
 func(bc *Blockchain) CreateTransaction(recipientAddress, senderAddress string, value float64){
 	transaction := NewTransaction(recipientAddress, senderAddress, value)
 	bc.TransactionPool = append(bc.TransactionPool, transaction)
+}
+
+func(bc *Blockchain) ProofOfWork() int{
+	nonce := 0
+	zeros := strings.Repeat("0", 3)
+	guessBlock := Block{Nonce: nonce, PrevHash: bc.LastBlock().PrevHash, 
+		Transactions: bc.TransactionPool, Timestamp: time.Now().Unix()}
+	m, _ := json.Marshal(guessBlock)
+
+	guessBlockHash := sha256.Sum256(m)
+	guessBlockStr := fmt.Sprintf("%x", guessBlockHash)
+	for guessBlockStr[:3] != zeros {
+		nonce++
+		guessBlock.Nonce = nonce
+		m, _ = json.Marshal(guessBlock)
+		guessBlockHash = sha256.Sum256(m)
+		guessBlockStr = fmt.Sprintf("%x", guessBlockHash)
+
+	}
+
+	bc.CreateBlock(nonce, guessBlock.PrevHash, guessBlock.Transactions)
+
+	return nonce
+
 }
 
 func(bc *Blockchain) Print(){
