@@ -5,8 +5,11 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/json"
+	"fmt"
 
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/nico-phil/transact/utils"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -67,6 +70,86 @@ func NewWallet() (*Wallet, error){
 	w.BlockchainAddress =  base58.Encode(digest8)
 	
 	return w, nil
+}
+
+func(w *Wallet) PulicKeyStr() string{
+	return fmt.Sprintf("%x%x", w.PublicKey.X.Bytes(), w.PublicKey.Y.Bytes())
+}
+
+func(w *Wallet) PrivateKeyStr() string{
+	return fmt.Sprintf("%x", w.PrivateKey.D.Bytes())
+}
+
+func(w *Wallet) Print(){
+	fmt.Printf("public key: %x%x\n", w.PublicKey.X.Bytes(), w.PublicKey.Y.Bytes())
+	fmt.Printf("private key: %x\n", w.PrivateKey.D.Bytes())
+	fmt.Printf("blockchain address: %s\n", w.BlockchainAddress)
+	
+}
+
+type Transaction struct {
+	SenderPublicKey *ecdsa.PublicKey 
+	SenderPrivateKey *ecdsa.PrivateKey 
+	SenderBlockchainAddress string 
+	RecipientBlockchainAddress string 
+	Value float64 
+}
+
+func NewTransaction(
+	sendPublicKey *ecdsa.PublicKey, 
+	senderPrivateKey *ecdsa.PrivateKey, 
+	senderBlockchainAddress string, 
+	recipientblockchainAddress string, 
+	value float64) *Transaction{
+
+
+	return &Transaction{
+		SenderPublicKey: sendPublicKey,
+		SenderPrivateKey: senderPrivateKey,
+		SenderBlockchainAddress: senderBlockchainAddress,
+		RecipientBlockchainAddress: recipientblockchainAddress,
+		Value: value,
+	}
+
+}
+
+func(t *Transaction) MarshalJSON() ([]byte, error){
+	var tr = struct{
+		SenderBlockchainAddress string `json:"sender_blockchain_address"`
+		RecipientBlockchainAddress string `json:"recipient_blockchain_address"`
+		Value float64 `json:"value"`
+	}{
+		SenderBlockchainAddress: t.SenderBlockchainAddress,
+		RecipientBlockchainAddress: t.RecipientBlockchainAddress,
+		Value: t.Value, 
+	}
+
+	m, err := json.Marshal(tr)
+	return m, err
+}
+
+func(t *Transaction) GenerateSignature() (*utils.Signature, error){
+	m, err := t.MarshalJSON()
+	if err != nil {
+		return &utils.Signature{}, err
+	}
+	hash := sha256.Sum256(m)
+	r, s, err := ecdsa.Sign(rand.Reader, t.SenderPrivateKey, hash[:])
+	if err != nil {
+		return &utils.Signature{}, err
+	}
+
+	signature := utils.Signature{R: r, S:s}
+	return &signature, nil
+}
+
+func(t *Transaction) Print(){
+	fmt.Printf("sender_public_key: %s", t.SenderPublicKey)
+	fmt.Printf("sender_private_key: %s", t.SenderPrivateKey)
+	fmt.Printf("sender_blockchain_address: %s", t.SenderBlockchainAddress)
+	fmt.Printf("recipent_blockchain_address: %s", t.RecipientBlockchainAddress)
+	fmt.Printf("value: %d", t.Value)
+	
 
 }
 
