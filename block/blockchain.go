@@ -8,9 +8,18 @@ import (
 	"time"
 )
 
+const (
+	MINING_SENDER = "THE BLOCKCHAIN"
+	MINING_DIFFICULTY = 3
+	MINER_REWARDS = 1.0
+
+)
+
 type Blockchain struct {
 	Chain []*Block
 	TransactionPool []*Transaction
+	BlockchainAddress string
+	
 }
 
 func NewBlockchain() *Blockchain{
@@ -63,9 +72,24 @@ func(bc *Blockchain) ProofOfWork() int{
 
 }
 
+func(bc *Blockchain) Mining() bool{
+	if len(bc.TransactionPool) ==0 {
+		return false
+	}
+
+	bc.CreateTransaction("THE MINER BLOCKCHAIN ADDRESS", "THE BLOCKCHAIN", MINER_REWARDS)
+	_ = bc.ProofOfWork()
+
+	return true
+	
+	//send reward to miner
+	//remove money from user A
+	// send money to user B
+}
+
 func(bc *Blockchain) Print(){
 	for i, block := range bc.Chain {
-		fmt.Printf("%s chain %d %s \n", strings.Repeat("=", 25), i, strings.Repeat("=", 25))
+		fmt.Printf("%s chain %d %s \n", strings.Repeat("=", 40), i, strings.Repeat("=", 40))
 		block.Print()
 	}
 }
@@ -118,7 +142,7 @@ func NewTransaction(recipentAddress, senderAddress string, value float64) *Trans
 }
 
 func( t *Transaction) Print(){
-	fmt.Printf("%s\n", strings.Repeat("-", 40))
+	fmt.Printf("     %s transactions %s \n", strings.Repeat("-", 20), strings.Repeat("-", 20))
 	fmt.Printf("recipient_address: %s \n", t.RecipientBlockchainAddress)
 	fmt.Printf("sender_address: %s \n", t.SenderBlockchainAddress)
 	fmt.Printf("value : %f \n", t.Value)
