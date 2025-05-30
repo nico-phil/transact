@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/nico-phil/transact/block"
+	"github.com/nico-phil/transact/wallet"
 )
 
 func main() {
-	blockChain := block.NewBlockchain()
+	// blockChain := block.NewBlockchain()
 
-	blockChain.CreateTransaction("recipeint address", "senderaddress", 1)
+	// blockChain.CreateTransaction("recipeint address", "senderaddress", 1)
+	// blockChain.Mining()
 
+	// blockChain.Print()
+	
+	// fmt.Println("pool", len(blockChain.TransactionPool))
 
-	// blockChain.CreateBlock(1, blockChain.LastBlock().Hash(), blockChain.TransactionPool)
-
-	_ = blockChain.ProofOfWork()
-
-	blockChain.Print()
+	wallet.NewWallet()
 
 }
