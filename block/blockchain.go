@@ -1,11 +1,14 @@
 package block
 
 import (
+	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/nico-phil/transact/utils"
 )
 
 const (
@@ -43,9 +46,16 @@ func(bc *Blockchain) CreateBlock(nonce int, previousHash [32]byte, transaction [
 	bc.TransactionPool = []*Transaction{}
 }
 
-func(bc *Blockchain) CreateTransaction(recipientAddress, senderAddress string, value float64){
+func(bc *Blockchain) AddTransaction(recipientAddress, senderAddress string, value float64, senderPublickey *ecdsa.PublicKey, signature *utils.Signature) bool{
 	transaction := NewTransaction(recipientAddress, senderAddress, value)
-	bc.TransactionPool = append(bc.TransactionPool, transaction)
+
+	isVerify :=  bc.VerifyTransactionSignature(senderPublickey, signature, transaction )
+	if isVerify {
+		bc.TransactionPool = append(bc.TransactionPool, transaction)
+		return true
+	}
+
+	return false
 }
 
 func(bc *Blockchain) ProofOfWork() int{
@@ -77,14 +87,21 @@ func(bc *Blockchain) Mining() bool{
 		return false
 	}
 
-	bc.CreateTransaction("THE MINER BLOCKCHAIN ADDRESS", "THE BLOCKCHAIN", MINER_REWARDS)
+	// bc.AddTransaction("THE MINER BLOCKCHAIN ADDRESS", "THE BLOCKCHAIN", MINER_REWARDS, )
 	_ = bc.ProofOfWork()
+
 
 	return true
 	
 	//send reward to miner
 	//remove money from user A
 	// send money to user B
+}
+
+func(bc *Blockchain) VerifyTransactionSignature(senderPublickey *ecdsa.PublicKey, signature *utils.Signature, transaction *Transaction) bool{
+	m, _ := transaction.MarshalJSON()
+	isVerify := ecdsa.Verify(senderPublickey, m, signature.R, signature.S)
+	return isVerify
 }
 
 func(bc *Blockchain) Print(){
@@ -140,6 +157,22 @@ func NewTransaction(recipentAddress, senderAddress string, value float64) *Trans
 		Value: value,
 	}
 }
+
+func(t *Transaction) MarshalJSON()([]byte, error){
+	var tr = struct{
+		SenderBlockchainAddress string `json:"sender_blockchain_address"`
+		RecipientBlockchainAddress string `json:"recipient_blockchain_address"`
+		Value float64 `json:"value"`
+	}{
+		SenderBlockchainAddress: t.SenderBlockchainAddress,
+		RecipientBlockchainAddress: t.RecipientBlockchainAddress,
+		Value: t.Value, 
+	}
+	
+	m, err := json.Marshal(tr)
+	return m, err
+}
+
 
 func( t *Transaction) Print(){
 	fmt.Printf("     %s transactions %s \n", strings.Repeat("-", 20), strings.Repeat("-", 20))
