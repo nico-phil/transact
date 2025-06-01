@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"text/template"
 )
 
 type WalletServer struct {
@@ -13,13 +14,17 @@ func NewWalletServer(port int) *WalletServer {
 	return &WalletServer{Port:port }
 }
 
-func(ws *WalletServer) HelloHandler(w http.ResponseWriter, r *http.Request){
-	fmt.Println("hello from wallet server")
+func(ws *WalletServer) Index(w http.ResponseWriter, r *http.Request){
+	t , err := template.ParseFiles("template/index.html", )
+	if err != nil {
+		fmt.Println("error", err)
+	}
+	t.Execute(w, "")
 }
 
 func(ws *WalletServer) Run() error{
 	router := http.NewServeMux()
 
-	router.HandleFunc("/", ws.HelloHandler)
+	router.HandleFunc("/", ws.Index)
 	return http.ListenAndServe(fmt.Sprintf(":%d",ws.Port), router)
 }
