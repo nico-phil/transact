@@ -10,6 +10,6 @@ func main(){
 	blockchainServer := NewBlockchainServer(config.GetServerPort())
 	err := blockchainServer.Run()
 	if err != nil {
-		log.Fatal("cannot start wallet server")
+		log.Fatal("cannot start blockchain server")
 	}
 }

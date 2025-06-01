@@ -25,14 +25,16 @@ type Blockchain struct {
 	
 }
 
-func NewBlockchain() *Blockchain{
+func NewBlockchain(blockchainAddress string) *Blockchain{
 	block := &Block{}
 	hash := block.Hash()
 	block.PrevHash = hash
 	return &Blockchain{
 		Chain: []*Block{block},
+		BlockchainAddress: blockchainAddress,
 	}
 }
+
 
 func( bc *Blockchain) LastBlock() *Block {
 	return bc.Chain[len(bc.Chain) - 1]
@@ -149,6 +151,22 @@ func NewBlock(nonce int, prevHash [32]byte, transacrions []*Transaction) *Block 
 		Transactions: transacrions,
 		Timestamp: time.Now().Unix(),
 	}
+}
+
+func(b *Block) MarshalJSON()([]byte, error){
+	var bl = struct {
+		Nonce int `json:"nonce"`
+		PrevHash string`json:"previous_hash"`
+		Transactions []*Transaction `json:"transactions"`
+		Timestamp int64 `json:"timestamp"`
+	}{
+		Nonce: b.Nonce,
+		PrevHash: fmt.Sprintf("%x", b.PrevHash),
+		Transactions: b.Transactions,
+		Timestamp: b.Timestamp,
+	}
+
+	return json.Marshal(bl)
 }
 
 func(b *Block) Print(){
