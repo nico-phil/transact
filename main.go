@@ -15,7 +15,12 @@ func main() {
 
 	t := wallet.NewTransaction(walletA.PublicKey, walletA.PrivateKey, walletA.BlockchainAddress,walletB.BlockchainAddress, 1.0 )
 
-	sig, _ := t.GenerateSignature()
+	sig, err:= t.GenerateSignature()
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	fmt.Printf("signature: %s", sig)
 
 	blockchainTransaction := block.Transaction{
 		SenderBlockchainAddress: t.SenderBlockchainAddress,
@@ -24,11 +29,6 @@ func main() {
 	}
 	
 	isVerify := blockChain.VerifyTransactionSignature(t.SenderPublicKey, sig, &blockchainTransaction )
-
-	// blockChain.CreateTransaction("recipeint address", "senderaddress", 1)
-	// blockChain.Mining()
-
-	// blockChain.Print()
 	
 	fmt.Println("isVerify", isVerify)
 
