@@ -22,16 +22,14 @@ func main() {
 
 	fmt.Printf("signature: %s", sig)
 
-	blockchainTransaction := block.Transaction{
-		SenderBlockchainAddress: t.SenderBlockchainAddress,
-		RecipientBlockchainAddress: t.RecipientBlockchainAddress,
-		Value: t.Value,
-	}
-	
-	isVerify := blockChain.VerifyTransactionSignature(t.SenderPublicKey, sig, &blockchainTransaction )
-	
-	fmt.Println("isVerify", isVerify)
 
+	isAdded := blockChain.AddTransaction(t.RecipientBlockchainAddress, t.SenderBlockchainAddress, t.Value, t.SenderPublicKey, sig)
+	
+	if isAdded {
+		blockChain.Mining()
+	} 
+
+	blockChain.Print()
 	
 
 }
