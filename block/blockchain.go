@@ -50,12 +50,12 @@ func(bc *Blockchain) AddTransaction(recipientAddress, senderAddress string, valu
 	transaction := NewTransaction(recipientAddress, senderAddress, value)
 
 	isVerify :=  bc.VerifyTransactionSignature(senderPublickey, signature, transaction )
-	if isVerify {
-		bc.TransactionPool = append(bc.TransactionPool, transaction)
-		return true
+	if !isVerify {
+		return false
 	}
 
-	return false
+	bc.TransactionPool = append(bc.TransactionPool, transaction)
+	return true
 }
 
 func(bc *Blockchain) ProofOfWork() int{
@@ -99,8 +99,10 @@ func(bc *Blockchain) Mining() bool{
 }
 
 func(bc *Blockchain) VerifyTransactionSignature(senderPublickey *ecdsa.PublicKey, signature *utils.Signature, transaction *Transaction) bool{
-	m, _ := transaction.MarshalJSON()
-	isVerify := ecdsa.Verify(senderPublickey, m, signature.R, signature.S)
+	m, _ := json.Marshal(transaction)
+	h := sha256.Sum256(m)
+	isVerify := ecdsa.Verify(senderPublickey, h[:], signature.R, signature.S)
+	fmt.Println("transaction verification:", isVerify)
 	return isVerify
 }
 

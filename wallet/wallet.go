@@ -129,7 +129,7 @@ func(t *Transaction) MarshalJSON() ([]byte, error){
 }
 
 func(t *Transaction) GenerateSignature() (*utils.Signature, error){
-	m, err := t.MarshalJSON()
+	m, err := json.Marshal(t)
 	if err != nil {
 		return &utils.Signature{}, err
 	}
@@ -143,13 +143,12 @@ func(t *Transaction) GenerateSignature() (*utils.Signature, error){
 	return &signature, nil
 }
 
+
 func(t *Transaction) Print(){
 	fmt.Printf("sender_public_key: %s", t.SenderPublicKey)
 	fmt.Printf("sender_private_key: %s", t.SenderPrivateKey)
 	fmt.Printf("sender_blockchain_address: %s", t.SenderBlockchainAddress)
 	fmt.Printf("recipent_blockchain_address: %s", t.RecipientBlockchainAddress)
 	fmt.Printf("value: %d", t.Value)
-	
-
 }
 
