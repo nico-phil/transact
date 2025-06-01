@@ -49,6 +49,11 @@ func(bc *Blockchain) CreateBlock(nonce int, previousHash [32]byte, transaction [
 func(bc *Blockchain) AddTransaction(recipientAddress, senderAddress string, value float64, senderPublickey *ecdsa.PublicKey, signature *utils.Signature) bool{
 	transaction := NewTransaction(recipientAddress, senderAddress, value)
 
+	if senderAddress == MINING_SENDER {
+		bc.TransactionPool = append(bc.TransactionPool, transaction)
+		return true
+	}
+
 	isVerify :=  bc.VerifyTransactionSignature(senderPublickey, signature, transaction )
 	if !isVerify {
 		return false
@@ -87,10 +92,9 @@ func(bc *Blockchain) Mining() bool{
 		return false
 	}
 
-	// bc.AddTransaction("THE MINER BLOCKCHAIN ADDRESS", "THE BLOCKCHAIN", MINER_REWARDS, )
+
+	bc.AddTransaction("X", "THE BLOCKCHAIN", MINER_REWARDS, nil, nil )
 	_ = bc.ProofOfWork()
-
-
 	return true
 	
 	//send reward to miner
@@ -104,6 +108,23 @@ func(bc *Blockchain) VerifyTransactionSignature(senderPublickey *ecdsa.PublicKey
 	isVerify := ecdsa.Verify(senderPublickey, h[:], signature.R, signature.S)
 	fmt.Println("transaction verification:", isVerify)
 	return isVerify
+}
+
+func(bc *Blockchain) CalculateTotalAmount(blockchainAddress string) float64 {
+	var value float64 = 0
+	for _ ,c := range bc.Chain {
+		for _, t := range c.Transactions {
+			if t.SenderBlockchainAddress == blockchainAddress {
+				value = value - t.Value
+			}
+			
+			if t.RecipientBlockchainAddress == blockchainAddress {
+				value = value + t.Value
+			}
+		}
+	}
+
+	return value
 }
 
 func(bc *Blockchain) Print(){
