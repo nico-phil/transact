@@ -5,8 +5,10 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/nico-phil/transact/utils"
@@ -78,6 +80,22 @@ func(w *Wallet) PulicKeyStr() string{
 
 func(w *Wallet) PrivateKeyStr() string{
 	return fmt.Sprintf("%x", w.PrivateKey.D.Bytes())
+}
+
+func(w *Wallet) StringToPrivateKey(){}
+
+func StringToPublicKey(s string) *ecdsa.PublicKey {
+	bx, _ := hex.DecodeString(s[:64])
+	by, _ := hex.DecodeString(s[64:])
+	
+	var bix big.Int
+	var biy big.Int
+
+	bix.SetBytes(bx)
+	biy.SetBytes(by)
+
+	fmt.Println("len", len(s))
+	return &ecdsa.PublicKey{Curve: elliptic.P256(), X: &bix, Y: &biy }
 }
 
 func(w *Wallet) Print(){
@@ -152,3 +170,12 @@ func(t *Transaction) Print(){
 	fmt.Printf("value: %d", t.Value)
 }
 
+
+type TransactionRequest struct {
+	SenderPrivateKey string `json:"sender_private_key"`
+	SenderPublicKey string `json:"sender_public_key"`
+	SenderBlockchainAddress string `json:"sender_blockchain_address"`
+	RecipientblockchainAddress string `json:"recipient_blockchain_address"`
+	Value float64 `json:"value"`
+
+}

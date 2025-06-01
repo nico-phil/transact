@@ -41,10 +41,27 @@ func(ws *WalletServer) CreateWalletHandler(w http.ResponseWriter, r *http.Reques
 	utils.WriteJSON(w, http.StatusCreated, data)
 }
 
+func(ws *WalletServer) CreateTransactions(w http.ResponseWriter,  r *http.Request){
+	var tr wallet.TransactionRequest
+	err := utils.ReadJSON(r, &tr)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, wrapper{"message":"fail to read json"})
+		return
+	}
+
+	publicKey := wallet.StringToPublicKey(tr.SenderPublicKey)
+	
+	fmt.Println("publicKey", publicKey)
+	// newTransaction := wallet.NewTransaction()
+
+	utils.WriteJSON(w, http.StatusCreated, wrapper{"transaction": tr})
+}
+
 func(ws *WalletServer) Run() error{
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", ws.Index)
 	router.HandleFunc("/wallet", ws.CreateWalletHandler)
+	router.HandleFunc("POST /transactions", ws.CreateTransactions)
 	return http.ListenAndServe(fmt.Sprintf(":%d",ws.Port), router)
 }
