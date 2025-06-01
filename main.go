@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	blockChain := block.NewBlockchain()
+	blockChain := block.NewBlockchain("")
 
 	walletA, _ := wallet.NewWallet()
 	walletB, _ := wallet.NewWallet()
