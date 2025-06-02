@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func ReadJSON(r *http.Request, dst any) error{
+func ReadJSON(r *http.Request, dst any) error {
 	err := json.NewDecoder(r.Body).Decode(&dst)
 	if err != nil {
 		return err
@@ -14,7 +14,7 @@ func ReadJSON(r *http.Request, dst any) error{
 	return nil
 }
 
-func WriteJSON(w http.ResponseWriter, statusCode int,  data any) error {
+func WriteJSON(w http.ResponseWriter, statusCode int, data any) error {
 	byteData, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
@@ -23,5 +23,5 @@ func WriteJSON(w http.ResponseWriter, statusCode int,  data any) error {
 	w.WriteHeader(statusCode)
 	w.Write(byteData)
 
-	return  nil
+	return nil
 }

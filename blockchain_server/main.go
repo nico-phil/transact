@@ -6,7 +6,7 @@ import (
 	"github.com/nico-phil/transact/config"
 )
 
-func main(){
+func main() {
 	blockchainServer := NewBlockchainServer(config.GetServerPort())
 	err := blockchainServer.Run()
 	if err != nil {
