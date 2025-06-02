@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/nico-phil/transact/block"
 	"github.com/nico-phil/transact/utils"
 	"github.com/nico-phil/transact/wallet"
 )
@@ -49,12 +50,29 @@ func(ws *WalletServer) CreateTransactions(w http.ResponseWriter,  r *http.Reques
 		return
 	}
 
-	publicKey := utils.PublicKeyFromString(tr.SenderPublicKey)
-	privateKey := utils.PrivateKeyFromString(tr.SenderPrivateKey, *publicKey )
+	senderPublicKey := utils.PublicKeyFromString(tr.SenderPublicKey)
+	senderPrivateKey := utils.PrivateKeyFromString(tr.SenderPrivateKey, *senderPublicKey )
 	
-	// newTransaction := wallet.NewTransaction()
+	
+	newTransaction := wallet.NewTransaction(senderPublicKey, senderPrivateKey, 
+		tr.SenderBlockchainAddress, tr.RecipientblockchainAddress, tr.Value)
 
-	utils.WriteJSON(w, http.StatusCreated, wrapper{"transaction": tr})
+	signature, err := newTransaction.GenerateSignature()
+	if err != nil {
+		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "failed to generate signature"})
+		return
+	}
+
+	blockchainTransaction :=  block.TransactionRequest {
+		SenderBlockchainAddress: tr.SenderBlockchainAddress,
+		RecipientblockchainAddress: tr.RecipientblockchainAddress,
+		Value: tr.Value,
+		SenderPublicKey: tr.SenderPublicKey,
+		Signature: signature.String(),
+	}
+
+
+	utils.WriteJSON(w, http.StatusCreated, wrapper{"transaction": blockchainTransaction})
 }
 
 func(ws *WalletServer) Run() error{

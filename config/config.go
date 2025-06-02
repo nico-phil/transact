@@ -6,13 +6,13 @@ import (
 	"strconv"
 )
 
-func GetServerPort() int{
+func GetServerPort() int {
 	v := getEnvironmentValue("PORT")
 	intV, _ := strconv.Atoi(v)
 	return intV
 }
 
-func getEnvironmentValue(key string) string{
+func getEnvironmentValue(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
 		log.Fatalf("missing enviroment variable: %s \n", "PORT")

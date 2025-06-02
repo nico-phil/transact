@@ -19,10 +19,10 @@ type BlockchainServer struct {
 }
 
 func NewBlockchainServer(port int) *BlockchainServer {
-	return &BlockchainServer{Port:port }
+	return &BlockchainServer{Port: port}
 }
 
-func(bs *BlockchainServer) GetBlockchain() *block.Blockchain{
+func (bs *BlockchainServer) GetBlockchain() *block.Blockchain {
 	blockchain, ok := cache["blockchain"]
 	if !ok {
 		w, _ := wallet.NewWallet()
@@ -35,20 +35,19 @@ func(bs *BlockchainServer) GetBlockchain() *block.Blockchain{
 	return blockchain
 }
 
-func(bs *BlockchainServer) GetchainsHandler(w http.ResponseWriter, r *http.Request){
+func (bs *BlockchainServer) GetchainsHandler(w http.ResponseWriter, r *http.Request) {
 	bc := bs.GetBlockchain()
 
-	data := wrapper {
+	data := wrapper{
 		"chain": bc.Chain,
 	}
 	utils.WriteJSON(w, http.StatusOK, data)
-	
+
 }
 
-func(bs *BlockchainServer) Run() error{
+func (bs *BlockchainServer) Run() error {
 	router := http.NewServeMux()
-	
+
 	router.HandleFunc("/chains", bs.GetchainsHandler)
 	return http.ListenAndServe(fmt.Sprintf(":%d", bs.Port), router)
 }
-

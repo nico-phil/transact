@@ -6,8 +6,7 @@ import (
 	"github.com/nico-phil/transact/config"
 )
 
-
-func main(){
+func main() {
 	WalletServer := NewWalletServer(config.GetServerPort())
 	err := WalletServer.Run()
 	if err != nil {
