@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"text/template"
@@ -14,10 +17,11 @@ type wrapper map[string]any
 
 type WalletServer struct {
 	Port int
+	Client *http.Client
 }
 
 func NewWalletServer(port int) *WalletServer {
-	return &WalletServer{Port:port }
+	return &WalletServer{Port:port, Client: &http.Client{} }
 }
 
 func(ws *WalletServer) Index(w http.ResponseWriter, r *http.Request){
@@ -71,8 +75,28 @@ func(ws *WalletServer) CreateTransactions(w http.ResponseWriter,  r *http.Reques
 		Signature: signature.String(),
 	}
 
+	url := "http://localhost:3000/transactions"
+	m, _ := json.Marshal(blockchainTransaction)
+	buf := bytes.NewBuffer(m)
+	
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost,url, buf)
+	if err !=  nil{
+		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "failed to generate req"})
+		return
+	}
+	
+	response, err := ws.Client.Do(req)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed in do"})
+		return
+	}
 
-	utils.WriteJSON(w, http.StatusCreated, wrapper{"transaction": blockchainTransaction})
+	if response.StatusCode != http.StatusOK {
+		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed"})
+		return 
+	}
+	
+	utils.WriteJSON(w, http.StatusCreated, wrapper{"message": "sucess"}, )
 }
 
 func(ws *WalletServer) Run() error{
