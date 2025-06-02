@@ -5,10 +5,8 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"math/big"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/nico-phil/transact/utils"
@@ -84,19 +82,7 @@ func(w *Wallet) PrivateKeyStr() string{
 
 func(w *Wallet) StringToPrivateKey(){}
 
-func StringToPublicKey(s string) *ecdsa.PublicKey {
-	bx, _ := hex.DecodeString(s[:64])
-	by, _ := hex.DecodeString(s[64:])
-	
-	var bix big.Int
-	var biy big.Int
 
-	bix.SetBytes(bx)
-	biy.SetBytes(by)
-
-	fmt.Println("len", len(s))
-	return &ecdsa.PublicKey{Curve: elliptic.P256(), X: &bix, Y: &biy }
-}
 
 func(w *Wallet) Print(){
 	fmt.Printf("public key: %x%x\n", w.PublicKey.X.Bytes(), w.PublicKey.Y.Bytes())

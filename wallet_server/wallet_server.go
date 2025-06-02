@@ -49,9 +49,9 @@ func(ws *WalletServer) CreateTransactions(w http.ResponseWriter,  r *http.Reques
 		return
 	}
 
-	publicKey := wallet.StringToPublicKey(tr.SenderPublicKey)
+	publicKey := utils.PublicKeyFromString(tr.SenderPublicKey)
+	privateKey := utils.PrivateKeyFromString(tr.SenderPrivateKey, *publicKey )
 	
-	fmt.Println("publicKey", publicKey)
 	// newTransaction := wallet.NewTransaction()
 
 	utils.WriteJSON(w, http.StatusCreated, wrapper{"transaction": tr})
