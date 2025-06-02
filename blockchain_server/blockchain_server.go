@@ -45,9 +45,20 @@ func (bs *BlockchainServer) GetchainsHandler(w http.ResponseWriter, r *http.Requ
 
 }
 
+func(bs *BlockchainServer) CreateTransaction(w http.ResponseWriter, r *http.Request){
+	var tr block.TransactionRequest
+	err := utils.ReadJSON(r, &tr)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, wrapper{"error": "cannot read json"})
+		return
+	}
+}
+
+
 func (bs *BlockchainServer) Run() error {
 	router := http.NewServeMux()
 
 	router.HandleFunc("/chains", bs.GetchainsHandler)
+	router.HandleFunc("/transactions", bs.CreateTransaction)
 	return http.ListenAndServe(fmt.Sprintf(":%d", bs.Port), router)
 }
