@@ -16,49 +16,48 @@ import (
 type wrapper map[string]any
 
 type WalletServer struct {
-	Port int
+	Port   int
 	Client *http.Client
 }
 
 func NewWalletServer(port int) *WalletServer {
-	return &WalletServer{Port:port, Client: &http.Client{} }
+	return &WalletServer{Port: port, Client: &http.Client{}}
 }
 
-func(ws *WalletServer) Index(w http.ResponseWriter, r *http.Request){
-	t , err := template.ParseFiles("template/index.html", )
+func (ws *WalletServer) Index(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("template/index.html")
 	if err != nil {
 		fmt.Println("error", err)
 	}
 	t.Execute(w, "")
 }
 
-func(ws *WalletServer) CreateWalletHandler(w http.ResponseWriter, r *http.Request){
+func (ws *WalletServer) CreateWalletHandler(w http.ResponseWriter, r *http.Request) {
 	newWallet, err := wallet.NewWallet()
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "failed to create wallet"})
 	}
 	data := wrapper{
-		"private_key":  newWallet.PrivateKeyStr(),
-		"public_key": newWallet.PulicKeyStr(),
+		"private_key":        newWallet.PrivateKeyStr(),
+		"public_key":         newWallet.PulicKeyStr(),
 		"blockchain_address": newWallet.BlockchainAddress,
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, data)
 }
 
-func(ws *WalletServer) CreateTransactions(w http.ResponseWriter,  r *http.Request){
+func (ws *WalletServer) CreateTransactions(w http.ResponseWriter, r *http.Request) {
 	var tr wallet.TransactionRequest
 	err := utils.ReadJSON(r, &tr)
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, wrapper{"message":"fail to read json"})
+		utils.WriteJSON(w, http.StatusBadRequest, wrapper{"message": "fail to read json"})
 		return
 	}
 
 	senderPublicKey := utils.PublicKeyFromString(tr.SenderPublicKey)
-	senderPrivateKey := utils.PrivateKeyFromString(tr.SenderPrivateKey, *senderPublicKey )
-	
-	
-	newTransaction := wallet.NewTransaction(senderPublicKey, senderPrivateKey, 
+	senderPrivateKey := utils.PrivateKeyFromString(tr.SenderPrivateKey, *senderPublicKey)
+
+	newTransaction := wallet.NewTransaction(senderPublicKey, senderPrivateKey,
 		tr.SenderBlockchainAddress, tr.RecipientblockchainAddress, tr.Value)
 
 	signature, err := newTransaction.GenerateSignature()
@@ -67,24 +66,24 @@ func(ws *WalletServer) CreateTransactions(w http.ResponseWriter,  r *http.Reques
 		return
 	}
 
-	blockchainTransaction :=  block.TransactionRequest {
-		SenderBlockchainAddress: tr.SenderBlockchainAddress,
+	blockchainTransaction := block.TransactionRequest{
+		SenderBlockchainAddress:    tr.SenderBlockchainAddress,
 		RecipientblockchainAddress: tr.RecipientblockchainAddress,
-		Value: tr.Value,
-		SenderPublicKey: tr.SenderPublicKey,
-		Signature: signature.String(),
+		Value:                      tr.Value,
+		SenderPublicKey:            tr.SenderPublicKey,
+		Signature:                  signature.String(),
 	}
 
 	url := "http://localhost:3000/transactions"
 	m, _ := json.Marshal(blockchainTransaction)
 	buf := bytes.NewBuffer(m)
-	
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost,url, buf)
-	if err !=  nil{
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, buf)
+	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "failed to generate req"})
 		return
 	}
-	
+
 	response, err := ws.Client.Do(req)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed in do"})
@@ -93,17 +92,17 @@ func(ws *WalletServer) CreateTransactions(w http.ResponseWriter,  r *http.Reques
 
 	if response.StatusCode != http.StatusOK {
 		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed"})
-		return 
+		return
 	}
-	
-	utils.WriteJSON(w, http.StatusCreated, wrapper{"message": "sucess"}, )
+
+	utils.WriteJSON(w, http.StatusCreated, wrapper{"message": "sucess"})
 }
 
-func(ws *WalletServer) Run() error{
+func (ws *WalletServer) Run() error {
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", ws.Index)
 	router.HandleFunc("/wallet", ws.CreateWalletHandler)
-	router.HandleFunc("POST /transactions", ws.CreateTransactions)
-	return http.ListenAndServe(fmt.Sprintf(":%d",ws.Port), router)
+	router.HandleFunc("POST wallet/transactions", ws.CreateTransactions)
+	return http.ListenAndServe(fmt.Sprintf(":%d", ws.Port), router)
 }
