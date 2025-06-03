@@ -218,7 +218,7 @@ func (t *Transaction) Print() {
 type TransactionRequest struct {
 	SenderBlockchainAddress    string  `json:"sender_blockchain_address"`
 	RecipientblockchainAddress string  `json:"recipient_blockchain_address"`
-	Value float64 `json:"value"`
-	SenderPublicKey string `json:"sender_public_key"`
-	Signature string `json:"signature"`
+	Value                      float64 `json:"value"`
+	SenderPublicKey            string  `json:"sender_public_key"`
+	Signature                  string  `json:"signature"`
 }
