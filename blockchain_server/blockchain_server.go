@@ -46,7 +46,7 @@ func (bs *BlockchainServer) GetchainsHandler(w http.ResponseWriter, r *http.Requ
 }
 
 func (bs *BlockchainServer) CreateTransaction(w http.ResponseWriter, r *http.Request) {
-	// blockchain := bs.GetBlockchain()
+	blockchain := bs.GetBlockchain()
 	var tr block.TransactionRequest
 	err := utils.ReadJSON(r, &tr)
 	if err != nil {
@@ -54,11 +54,31 @@ func (bs *BlockchainServer) CreateTransaction(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	publicKey := utils.PublicKeyFromString(tr.SenderPublicKey)
+	signature := utils.SignatureFromString(tr.Signature)
 	
+	isAdded := blockchain.AddTransaction(tr.RecipientblockchainAddress, tr.SenderBlockchainAddress, tr.Value, publicKey, signature)
+	if(!isAdded) {
+		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "cannot add transaction to transaction poll"})
+		return
+	}
+
+	fmt.Println("in blockchain:", isAdded)
+	fmt.Println("transactionPool:", blockchain.TransactionPool)
+
 	
 	utils.WriteJSON(w, http.StatusCreated, wrapper{"tractions": tr})
 
+}
 
+func(bs *BlockchainServer) GetTransactions(w http.ResponseWriter, r *http.Request){
+	blockchain := bs.GetBlockchain()
+	transactions := blockchain.TransactionPool
+	if len(transactions) == 0 {
+		transactions =[]*block.Transaction{}
+	}
+
+	utils.WriteJSON(w, http.StatusOK, wrapper{"transactions": transactions})
 }
 
 func (bs *BlockchainServer) Run() error {
@@ -66,5 +86,6 @@ func (bs *BlockchainServer) Run() error {
 
 	router.HandleFunc("/chains", bs.GetchainsHandler)
 	router.HandleFunc("POST /blockchain/transactions", bs.CreateTransaction)
+	router.HandleFunc("GET /blockchain/transactions", bs.GetTransactions)
 	return http.ListenAndServe(fmt.Sprintf(":%d", bs.Port), router)
 }

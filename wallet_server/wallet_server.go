@@ -74,7 +74,7 @@ func (ws *WalletServer) CreateTransactions(w http.ResponseWriter, r *http.Reques
 		Signature:                  signature.String(),
 	}
 
-	url := "http://localhost:3000/transactions"
+	url := "http://localhost:3000/blockchain/transactions"
 	m, _ := json.Marshal(blockchainTransaction)
 	buf := bytes.NewBuffer(m)
 
@@ -90,7 +90,7 @@ func (ws *WalletServer) CreateTransactions(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusCreated {
 		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed"})
 		return
 	}
@@ -103,6 +103,6 @@ func (ws *WalletServer) Run() error {
 
 	router.HandleFunc("/", ws.Index)
 	router.HandleFunc("/wallet", ws.CreateWalletHandler)
-	router.HandleFunc("POST wallet/transactions", ws.CreateTransactions)
+	router.HandleFunc("POST /wallet/transactions", ws.CreateTransactions)
 	return http.ListenAndServe(fmt.Sprintf(":%d", ws.Port), router)
 }
