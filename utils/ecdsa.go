@@ -37,3 +37,15 @@ func PrivateKeyFromString(s string, publicKey ecdsa.PublicKey) *ecdsa.PrivateKey
 	d.SetBytes(b)
 	return &ecdsa.PrivateKey{PublicKey: publicKey, D: &d}
 }
+
+func SignatureFromString(s string) *Signature{
+	br, _ := hex.DecodeString(s[:64])
+	bs, _ := hex.DecodeString(s[64:])
+	
+	var intR big.Int
+	var intS big.Int
+
+	intR.SetBytes(br)
+	intS.SetBytes(bs)
+	return &Signature{R: &intR, S:&intS}
+}
