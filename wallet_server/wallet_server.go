@@ -86,12 +86,12 @@ func (ws *WalletServer) CreateTransactions(w http.ResponseWriter, r *http.Reques
 
 	response, err := ws.Client.Do(req)
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed in do"})
+		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed"})
 		return
 	}
 
 	if response.StatusCode != http.StatusCreated {
-		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed"})
+		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "request failed", " status_code": response.StatusCode})
 		return
 	}
 
