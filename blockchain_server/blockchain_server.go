@@ -27,6 +27,7 @@ func (bs *BlockchainServer) GetBlockchain() *block.Blockchain {
 	if !ok {
 		w, _ := wallet.NewWallet()
 		blockchain = block.NewBlockchain(w.BlockchainAddress)
+		cache["blockchain"] = blockchain
 		log.Printf("miner_wallet_private_key %v", w.PrivateKeyStr())
 		log.Printf("miner_wallet_public_key %v", w.PulicKeyStr())
 		log.Printf("miner_blockchain_address %v", w.BlockchainAddress)
@@ -62,12 +63,8 @@ func (bs *BlockchainServer) CreateTransaction(w http.ResponseWriter, r *http.Req
 		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "cannot add transaction to transaction poll"})
 		return
 	}
-
-	fmt.Println("in blockchain:", isAdded)
-	fmt.Println("transactionPool:", blockchain.TransactionPool)
-
 	
-	utils.WriteJSON(w, http.StatusCreated, wrapper{"tractions": tr})
+	utils.WriteJSON(w, http.StatusCreated, wrapper{"transaction": tr})
 
 }
 
