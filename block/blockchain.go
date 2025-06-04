@@ -80,8 +80,6 @@ func (bc *Blockchain) ProofOfWork() int {
 
 	}
 
-	bc.CreateBlock(nonce, guessBlock.PrevHash, guessBlock.Transactions)
-
 	return nonce
 
 }
@@ -91,20 +89,29 @@ func (bc *Blockchain) Mining() bool {
 		return false
 	}
 
-	bc.AddTransaction("X", "THE BLOCKCHAIN", MINER_REWARDS, nil, nil)
-	_ = bc.ProofOfWork()
+	isAdded := bc.AddTransaction("X", "THE BLOCKCHAIN", MINER_REWARDS, nil, nil)
+	if !isAdded {
+		return false
+	}
+	
+	nonce := bc.ProofOfWork()
+	if nonce == 0 {
+		return false
+	}
+	
+	bc.CreateBlock(nonce, bc.LastBlock().PrevHash, bc.TransactionPool)
 	return true
+}
 
-	//send reward to miner
-	//remove money from user A
-	// send money to user B
+func(bc *Blockchain) StartMining(){
+	bc.Mining()
+	time.AfterFunc(time.Second * 30, bc.StartMining)
 }
 
 func (bc *Blockchain) VerifyTransactionSignature(senderPublickey *ecdsa.PublicKey, signature *utils.Signature, transaction *Transaction) bool {
 	m, _ := json.Marshal(transaction)
 	h := sha256.Sum256(m)
 	isVerify := ecdsa.Verify(senderPublickey, h[:], signature.R, signature.S)
-	fmt.Println("transaction verification:", isVerify)
 	return isVerify
 }
 
