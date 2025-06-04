@@ -38,6 +38,7 @@
       const privateKeyEl = document.getElementById("private_key");
       const blockchainAddressEl = document.getElementById("blockchain_address");
       const sendBtn = document.getElementById("send_money_button");
+      const walletAmountEl = document.getElementById("wallet_amount");
 
       sendBtn.addEventListener("click", sendMoney);
       CreateWallet();
@@ -47,9 +48,9 @@
         const response = await fetch(url);
         jsonResponse = await response.json();
 
-        publicKeyel.innerText = jsonResponse.public_key;
-        privateKeyEl.innerText = jsonResponse.private_key;
-        blockchainAddressEl.innerText = jsonResponse.blockchain_address;
+        publicKeyel.value = jsonResponse.public_key;
+        privateKeyEl.value = jsonResponse.private_key;
+        blockchainAddressEl.value = jsonResponse.blockchain_address;
       }
 
       async function sendMoney() {
@@ -76,6 +77,16 @@
           const jsonResponse = await response.json();
         } catch (err) {}
       }
+
+      async function updateWallet() {
+        const url = `/wallet/amount?blockchain_address=${blockchainAddressEl.value}`;
+        const response = await fetch(url);
+        jsonResponse = await response.json();
+
+        walletAmountEl.innerText = "16";
+      }
+
+      setInterval(updateWallet, 3000);
     </script>
   </body>
 </html>
