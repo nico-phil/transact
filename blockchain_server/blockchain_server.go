@@ -63,8 +63,9 @@ func (bs *BlockchainServer) CreateTransaction(w http.ResponseWriter, r *http.Req
 		utils.WriteJSON(w, http.StatusInternalServerError, wrapper{"error": "cannot add transaction to transaction poll"})
 		return
 	}
-	
-	utils.WriteJSON(w, http.StatusCreated, wrapper{"transaction": tr})
+
+
+	utils.WriteJSON(w, http.StatusCreated, wrapper{"status": "pending"})
 
 }
 
@@ -79,8 +80,10 @@ func(bs *BlockchainServer) GetTransactions(w http.ResponseWriter, r *http.Reques
 }
 
 func (bs *BlockchainServer) Run() error {
+	bc := bs.GetBlockchain()
+	bc.StartMining()
+	
 	router := http.NewServeMux()
-
 	router.HandleFunc("/chains", bs.GetchainsHandler)
 	router.HandleFunc("POST /blockchain/transactions", bs.CreateTransaction)
 	router.HandleFunc("GET /blockchain/transactions", bs.GetTransactions)
