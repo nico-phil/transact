@@ -6,8 +6,6 @@
     <title>Wallet</title>
   </head>
   <body>
-    <h1>Hello from Wallet</h1>
-
     <div>
       <h1>Wallet</h1>
       <div id="wallet_amount">0</div>
@@ -39,6 +37,11 @@
       const publicKeyel = document.getElementById("public_key");
       const privateKeyEl = document.getElementById("private_key");
       const blockchainAddressEl = document.getElementById("blockchain_address");
+      const sendBtn = document.getElementById("send_money_button");
+
+      sendBtn.addEventListener("click", sendMoney);
+      CreateWallet();
+
       async function CreateWallet() {
         const url = "/wallet";
         const response = await fetch(url);
@@ -49,7 +52,30 @@
         blockchainAddressEl.innerText = jsonResponse.blockchain_address;
       }
 
-      CreateWallet();
+      async function sendMoney() {
+        const recipentAddressEl = document.getElementById(
+          "recipient_blockchain_address"
+        );
+        const amountEl = document.getElementById("send_amount");
+
+        const url = "/wallet/transactions";
+        const body = {
+          sender_private_key: privateKeyEl.value,
+          sender_public_key: publicKeyel.value,
+          sender_blockchain_address: blockchainAddressEl.value,
+          recipient_blockchain_address: recipentAddressEl.value,
+          value: Number(amountEl.value),
+        };
+
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            body: JSON.stringify(body),
+          });
+
+          const jsonResponse = await response.json();
+        } catch (err) {}
+      }
     </script>
   </body>
 </html>

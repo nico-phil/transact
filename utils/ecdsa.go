@@ -9,8 +9,8 @@ import (
 )
 
 type Signature struct {
-	R *big.Int
-	S *big.Int
+	R *big.Int 
+	S *big.Int 
 }
 
 func (s *Signature) String() string {

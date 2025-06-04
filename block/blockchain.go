@@ -89,7 +89,7 @@ func (bc *Blockchain) Mining() bool {
 		return false
 	}
 
-	isAdded := bc.AddTransaction("X", "THE BLOCKCHAIN", MINER_REWARDS, nil, nil)
+	isAdded := bc.AddTransaction(bc.BlockchainAddress, MINING_SENDER, MINER_REWARDS, nil, nil)
 	if !isAdded {
 		return false
 	}
@@ -98,7 +98,7 @@ func (bc *Blockchain) Mining() bool {
 	if nonce == 0 {
 		return false
 	}
-	
+
 	bc.CreateBlock(nonce, bc.LastBlock().PrevHash, bc.TransactionPool)
 	return true
 }
