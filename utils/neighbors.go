@@ -1,0 +1,25 @@
+package utils
+
+import (
+	"fmt"
+	"log"
+	"net"
+	"regexp"
+	"time"
+)
+
+var PATTERN = regexp.MustCompile(`((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?\.){3})(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)`)
+
+func IsFoundHost(host string, port int) bool {
+	target := fmt.Sprintf("%s:%d", host, port)
+	fmt.Println(target)
+
+	_, err := net.DialTimeout("tcp", target, 1*time.Second)
+	if err != nil {
+		log.Printf("%s %v\n", target, err)
+		return false
+	}
+
+	return true
+}
+
