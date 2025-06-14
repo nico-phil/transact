@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net"
-	"os"
 
 	"github.com/nico-phil/transact/block"
 	"github.com/nico-phil/transact/wallet"
@@ -32,21 +30,4 @@ func main() {
 
 	blockChain.Print()
 
-}
-
-func GetHost() string {
-	// defaultHost := "127.0.0.1"
-	hostname, err := os.Hostname()
-	if err != nil {
-		return "127.0.0.1"
-	}
-
-	fmt.Println("hostname", hostname)
-	address, err := net.LookupHost(hostname)
-	if err != nil {
-		return "127.0.0.1"
-	}
-
-	fmt.Println("address", address)
-	return address[2]
 }
